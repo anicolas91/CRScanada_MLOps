@@ -18,12 +18,11 @@ def get_best_xgboost_model(X_train, y_train, X_test, y_test,verbose=True):
         'max_depth': [10,15,20],
         'random_state': [42]
     }
-    # set up eval set
-    eval_set=[(X_train, y_train), (X_test, y_test)],
     #search the grid
-    model = xgb.XGBRegressor(eval_set=eval_set, objective='reg:squarederror', verbose=False)
-    clf = GridSearchCV(model, parameters)
-    clf.fit(X_train, y_train,verbose=False)
+    model = xgb.XGBRegressor(objective='reg:squarederror')
+    clf = GridSearchCV(model, parameters, cv = 3)
+    clf.fit(X_train, y_train)
+    
     if verbose:
         # establish the best parameters as the precursors for the model
         print(f'Best params: {clf.best_params_}')
