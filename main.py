@@ -21,6 +21,7 @@ import matplotlib
 from utils import modeling as modl
 from utils import preprocessing as prep
 from utils import splitting as splt
+from utils import registering as regs
 
 # ML models
 import xgboost as xgb
@@ -172,7 +173,14 @@ def main():
                 mlflow.log_artifact(local_path=figure_filename, artifact_path="figures")
             # print end rmse
             print(f'rmse: {rmse:.3f}')
-    print('finished.')
+    print('finished fitting models.')
+    
+    # register the best model and move to production
+    print('registering the model with lowest RMSE and moving it to production...')
+    regs.register_best_model()
+    regs.stage_model_production()
+    print('done.')
+
 
 # call main fcn if calling this script directly
 if __name__ == "__main__":
