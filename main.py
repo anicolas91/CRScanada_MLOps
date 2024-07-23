@@ -150,7 +150,7 @@ def main():
 
     # Main function
     # start runs at each model type and xlabel combo
-    for model_type in model_types[:1]:
+    for model_type in model_types: #[:1]:
         for x_labels in xlabels_combos:
             # start a print statement
             print(f'modeling {model_type} with x labels {','.join(x_labels)}...')
