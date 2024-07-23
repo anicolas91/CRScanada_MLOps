@@ -184,4 +184,14 @@ def main():
 
 # call main fcn if calling this script directly
 if __name__ == "__main__":
-    main()
+    main().from_source(
+        source="https://github.com/anicolas91/CRScanada_MLOps.git",
+        entrypoint="3.4/main.py:main",
+    ).deploy(
+        name="CRS-canada-score-train-deploy",
+        work_pool_name="zoompool",
+        tags=["training", "linear","xbgoost","generalCRS","deploy"],
+        description="trains a model to predict the CRS cutoff score for the general rounds",
+        version=1,
+        cron="0 10 1,15 * *" # run this at 10am of the 1st n 15th day of every month
+    )
