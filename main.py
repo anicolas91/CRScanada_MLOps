@@ -39,7 +39,12 @@ from sklearn.metrics import root_mean_squared_error
 # Prefect
 # 0. Activate the `CRSenv` conda environment
 # 1. Need to run on terminal: `prefect server start`
-# 2. Prefect cane be found on [http://127.0.0.1:4200](http://127.0.0.1:4200)
+# 2. Prefect can be found on [http://127.0.0.1:4200](http://127.0.0.1:4200)
+# 3. Create a work pool with: `prefect work-pool create zoompool -t process`
+# 4. Start a worker that polls your work pool with: `prefect worker start -p zoompool -t process`
+# 5. run the python script `python main.py`
+# 6. start a run of the flow from the CLI with: `prefect deployment run main/CRS-canada-score-train-deploy`
+
 # General Setup
 xgb.set_config(verbosity=0) # set xgb verbosity to none
 #mlflow setup
