@@ -28,15 +28,18 @@ def register_best_model(experiment_id="1",model_name = "CRS_Model"):
     # register the model
     mlflow.register_model(model_uri=model_uri, name=model_name)
 
-def stage_model_production(model_name = "CRS_Model",model_version = 1):
+def stage_model_production(model_name = "CRS_Model"):
     '''
     this function moves the model into production
     '''
     client = MlflowClient()
     model_stage = "Production"
+    all_transitions = client.get_latest_versions(name=model_name)
+    model_version = len(all_transitions)
+    
     client.transition_model_version_stage(
         name=model_name,
         version=model_version,
         stage=model_stage,
-        archive_existing_versions=False
+        archive_existing_versions=True
 )
