@@ -1,0 +1,5 @@
+figures/
+models/
+__pycache__/
+mlruns/
+*.db
