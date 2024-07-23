@@ -31,7 +31,7 @@ from sklearn.metrics import root_mean_squared_error
 
 # MLflow
 # 0. Activate the `CRSenv` conda environment & kill any hanging mlflow with `pkill -f gunicorn`
-# 1. Need to run on terminal: `mlflow ui --backend-store-uri sqlite:///mlflow.db`
+# 1. Need to run on terminal: `mlflow ui --backend-store-uri sqlite:///mlflow.db` ### or `mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts_local`
 # 2. MLflow can be found on [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
 # 3. We set the tracking uri on the python script
 # 4. We set the experiment name where all runs will be saved. It the exp doesn't exist mlflow will create one.
@@ -40,9 +40,14 @@ from sklearn.metrics import root_mean_squared_error
 # 0. Activate the `CRSenv` conda environment
 # 1. Need to run on terminal: `prefect server start`
 # 2. Prefect can be found on [http://127.0.0.1:4200](http://127.0.0.1:4200)
+# 3. run the python script `python main.py`
+# 4. start a run of the flow from the CLI with: `prefect deployment run main/CRS-canada-score-train-deploy`
+
+# or... 
+
 # 3. Create a work pool with: `prefect work-pool create zoompool -t process` (may error if pool already exists)
-# 4. Start a worker that polls your work pool with: `prefect worker start -p zoompool -t process`
-# 5. run the python script `python main.py`
+# 4. run the python script `python main.py`
+# 5. Start a worker that polls your work pool with: `prefect worker start --pool 'zoompool'`
 # 6. start a run of the flow from the CLI with: `prefect deployment run main/CRS-canada-score-train-deploy`
 
 # General Setup
@@ -189,12 +194,14 @@ def main():
 
 # call main fcn if calling this script directly
 if __name__ == "__main__":
-    main.from_source(
-        source="https://github.com/anicolas91/CRScanada_MLOps.git",
-        entrypoint="main.py:main",
-    ).deploy(
+    # main.from_source(
+    #     source="https://github.com/anicolas91/CRScanada_MLOps.git",
+    #     entrypoint="main.py:main",
+    # ).deploy(
+
+    main.serve(
         name="CRS-canada-score-train-deploy",
-        work_pool_name="zoompool",
+        #work_pool_name="zoompool",
         tags=["training", "linear","xbgoost","generalCRS","deploy"],
         description="trains a model to predict the CRS cutoff score for the general rounds",
         version=1,
