@@ -4,6 +4,7 @@ Preprocessing functions for web scraping, cleanup, and variable preprocessing
 
 import requests
 import pandas as pd
+import numpy as np
 
 def create_df_from_website(url):
     ''' 
@@ -119,6 +120,14 @@ def calculate_rolling_averages(df,roll_times=['30D','60D','90D','180D']):
         df['roll_'+r] = df['CRS cutoff'].rolling(r, min_periods=1,closed='left').mean()
     # flip from new to old
     df = df.iloc[::-1]
+
+    # replace nans wit the next available rolling average (roll times needs to be in order)
+    # NOTE: this fix exists to address long gaps in between CRS rounds
+    for i in range(1,len(roll_times)):
+        from_roll = f'roll_{roll_times[-i]}'
+        to_roll = f'roll_{roll_times[-i-1]}'
+
+        df[to_roll]= np.where(df[to_roll].isna(),df[from_roll],df[to_roll])
 
     return df
 
