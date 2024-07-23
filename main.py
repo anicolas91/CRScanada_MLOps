@@ -9,7 +9,7 @@ import mlflow
 from prefect import flow, task
 # import requests
 # import numpy as np
-# import pandas as pd
+# import pandas as pda
 
 
 #plotting libraries
@@ -40,7 +40,7 @@ from sklearn.metrics import root_mean_squared_error
 # 0. Activate the `CRSenv` conda environment
 # 1. Need to run on terminal: `prefect server start`
 # 2. Prefect can be found on [http://127.0.0.1:4200](http://127.0.0.1:4200)
-# 3. Create a work pool with: `prefect work-pool create zoompool -t process`
+# 3. Create a work pool with: `prefect work-pool create zoompool -t process` (may error if pool already exists)
 # 4. Start a worker that polls your work pool with: `prefect worker start -p zoompool -t process`
 # 5. run the python script `python main.py`
 # 6. start a run of the flow from the CLI with: `prefect deployment run main/CRS-canada-score-train-deploy`
@@ -145,7 +145,7 @@ def main():
 
     # Main function
     # start runs at each model type and xlabel combo
-    for model_type in model_types:
+    for model_type in model_types[:1]:
         for x_labels in xlabels_combos:
             # start a print statement
             print(f'modeling {model_type} with x labels {','.join(x_labels)}...')
@@ -189,9 +189,9 @@ def main():
 
 # call main fcn if calling this script directly
 if __name__ == "__main__":
-    main().from_source(
+    main.from_source(
         source="https://github.com/anicolas91/CRScanada_MLOps.git",
-        entrypoint="3.4/main.py:main",
+        entrypoint="main.py:main",
     ).deploy(
         name="CRS-canada-score-train-deploy",
         work_pool_name="zoompool",
