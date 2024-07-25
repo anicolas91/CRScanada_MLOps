@@ -17,13 +17,14 @@ def register_best_model(experiment_id="1",model_name = "CRS_Model"):
     #obtain run with lowest RMSE
     best_performace_run = client.search_runs(
         experiment_ids=experiment_id,
-        filter_string="metrics.rmse < 15",
+        filter_string="metrics.rmse < 20",
         order_by=["metrics.rmse ASC"],
     )[0]
 
     # get run id and set Model name
     run_id = best_performace_run.info.run_id
-    model_uri = f"runs:/{run_id}/artifacts/model"
+    #model_uri = f"runs:/{run_id}/artifacts/model"
+    model_uri = f"runs:/{run_id}/models"
 
     # register the model
     mlflow.register_model(model_uri=model_uri, name=model_name)
