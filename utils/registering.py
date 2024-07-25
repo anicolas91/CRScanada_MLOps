@@ -3,6 +3,8 @@ These functions basically register the best model and moves it to production in 
 Note: these functions need to be called after setting mlflow tracking uri
 '''
 
+import ast
+import pickle
 import mlflow
 from mlflow.tracking import MlflowClient
 
@@ -44,3 +46,50 @@ def stage_model_production(model_name = "CRS_Model"):
         stage=model_stage,
         archive_existing_versions=True
 )
+    
+def load_model_from_mlflow(run_id,model_type):
+    ''' 
+    given a run id and the type of model, download and read the model
+    '''
+    client = MlflowClient()
+
+    # download the model to local folder
+    model_filename = f'./models/{model_type}_model.bin'
+    client.download_artifacts(run_id, model_filename,'./')
+
+    # Load the pickle model
+    with open(model_filename, "rb") as f:
+        model = pickle.load(f)
+
+    return model
+
+
+def get_prod_info_from_registry(reg_model_name= "CRS_Model"):
+    ''' 
+    This function returns the model and other vars that was registered into production
+    '''
+
+    # get registered model
+    client = MlflowClient()
+    mymodel = client.get_registered_model(name= reg_model_name)
+
+    # get run Id of the production model in the register
+    for lv in mymodel.latest_versions:
+        stage = lv.current_stage
+        if stage == 'Production':
+            run_id = lv.run_id
+
+    # Get the details of the run
+    run_info = client.get_run(run_id)
+
+    # Retrieve the x_label from parameters
+    params = run_info.data.params
+    x_labels = ast.literal_eval(params['x_labels'])
+
+    # retrieve the label from the tags
+    tags = run_info.data.tags
+    model_type = tags['model_type']
+
+    model = load_model_from_mlflow(run_id=run_id,model_type=model_type)
+
+    return model, x_labels, model_type, run_id

@@ -157,3 +157,29 @@ def calculate_independent_vars(df):
     df = calculate_date_vars(df)
 
     return df
+
+def preprocess_query_date(query_date):
+    ''' 
+    This function converts the query date into a df alongside the X vals that are usually calculated during training
+    '''
+    url = 'https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json'
+    df = create_df_from_website(url)
+    df = cleanup_df_general_rounds(df)
+
+    # retrieve all the data prior to the query date
+    df_sub = df.loc[df.index <= query_date].copy()
+
+    # create a new row just for prediction
+    df_query = df[:0].copy()
+    df_query.loc[query_date,'round type'] = 'General'
+    df_query.loc[query_date,'invitations issued'] = 0 #dummy data
+    df_query.loc[query_date,'CRS cutoff'] = 0 #dummy data 
+
+    # concatenate to older data
+    df = pd.concat([df_query, df_sub])
+
+    # Calculate independent vars
+    df = calculate_independent_vars(df)
+
+    #retain only top query
+    return df[:1]
