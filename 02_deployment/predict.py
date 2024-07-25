@@ -1,13 +1,17 @@
 ## Predicting CRS scores
 # This is a pipeline that given a specific date, will forecast an estimated CRS cutoff value.
+import os
+import sys
 import mlflow
 
+here = os.path.dirname(__file__)
+sys.path.append(os.path.join(here, '..'))
 from utils import registering as regs
 from utils import preprocessing as prep
 from flask import Flask, request, jsonify
 
 # setup MLflow
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
+mlflow.set_tracking_uri("http://127.0.0.1:5000/")
 
 # set up app
 app = Flask('CRS-prediction')
@@ -43,8 +47,12 @@ if __name__ == "__main__":
     app.run(debug=True, host = '0.0.0.0', port=9696)
 
 ''' 
-to run this app in development simply do:
+to run this app simply do:
 
 gunicorn --bind=0.0.0.0:9696 predict:app
+
+and then you can query via:
+
+python test.py
 
 '''

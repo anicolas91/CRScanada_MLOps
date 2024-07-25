@@ -4,6 +4,7 @@
 
 #general libraries
 import os
+import sys
 #import pickle
 import mlflow
 from prefect import flow, task
@@ -18,6 +19,8 @@ from prefect import flow, task
 import matplotlib
 
 # import utils
+here = os.path.dirname(__file__)
+sys.path.append(os.path.join(here, '..'))
 from utils import modeling as modl
 from utils import preprocessing as prep
 from utils import splitting as splt
@@ -53,7 +56,7 @@ from sklearn.metrics import root_mean_squared_error
 # General Setup
 xgb.set_config(verbosity=0) # set xgb verbosity to none
 #mlflow setup
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
+mlflow.set_tracking_uri("sqlite:///mlflow.db") # when you set it up like this it overrides the cli artifacts bit
 mlflow.set_experiment("CRS-score-canada")
 
 # Cleaned up functions
