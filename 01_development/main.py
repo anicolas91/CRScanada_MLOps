@@ -34,7 +34,8 @@ from sklearn.metrics import root_mean_squared_error
 
 # MLflow
 # 0. Activate the `CRSenv` conda environment & kill any hanging mlflow with `pkill -f gunicorn`
-# 1. Need to run on terminal: `mlflow ui --backend-store-uri sqlite:///mlflow.db` ### or `mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts_local`
+# 1. Need to run on terminal: `mlflow ui --backend-store-uri sqlite:///mlflow.db` 
+#  or `mlflow server --backend-store-uri sqlite:///mlflow.db --host 0.0.0.0 --port 5000'
 # 2. MLflow can be found on [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
 # 3. We set the tracking uri on the python script
 # 4. We set the experiment name where all runs will be saved. It the exp doesn't exist mlflow will create one.

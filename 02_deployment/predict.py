@@ -11,7 +11,9 @@ from utils import preprocessing as prep
 from flask import Flask, request, jsonify
 
 # setup MLflow
-mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+mlflow.set_tracking_uri("http://host.docker.internal:5000")
+
+#mlflow.set_tracking_uri("http://127.0.0.1:5000/")
 
 # set up app
 app = Flask('CRS-prediction')
