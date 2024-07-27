@@ -1,0 +1,76 @@
+version: '3.7'
+
+volumes: 
+  grafana_data: {}
+  localstack_data: {}
+
+networks:
+  front-tier:
+  back-tier:
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+    networks:
+      - back-tier
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - back-tier
+      - front-tier  
+
+  grafana:
+    image: grafana/grafana
+    user: "472"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./03_monitoring/config/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+      - ./03_monitoring/config/grafana_dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./03_monitoring/dashboards:/opt/grafana/dashboards
+    networks:
+      - back-tier
+      - front-tier
+    restart: always
+  s3:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - AWS_ACCESS_KEY_ID=abc
+      - AWS_SECRET_ACCESS_KEY=xyz
+      - AWS_DEFAULT_REGION=us-east-1
+      - DOCKER_HOST=unix:///var/run/docker.sock #Allows LocalStack to interact with Docker
+    volumes:
+      - localstack_data:/var/lib/localstack #Ensures data persists across restarts
+    networks:
+      - back-tier
+      - front-tier
+    restart: always
+  crs_score_prediction:
+    build:
+      context: .
+      dockerfile: 02_deployment/Dockerfile
+    image: crs_score_prediction:v1
+    ports:
+      - "5000:5000"
+      - "9696:9696"
+    environment:
+      - MLFLOW_TRACKING_URI=http://host.docker.internal:5000 # only when running locally
+    volumes:
+      - ${MLFLOW_VOLUME_PATH}:${MLFLOW_VOLUME_PATH} # only needed when running locally
+    restart: always
+    entrypoint: ["gunicorn", "--bind=0.0.0.0:9696", "predict:app"]
+
+# by the way, MLFLOW_VOLUME_PATH is:
+# /Users/andreanicolas/Library/CloudStorage/GoogleDrive-andreanicolas91@gmail.com/My\ Drive/ASU_ComputerScience/CRScanda_MLOps/01_development/mlruns
