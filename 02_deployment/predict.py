@@ -10,10 +10,14 @@ from utils import registering as regs
 from utils import preprocessing as prep
 from flask import Flask, request, jsonify
 
+# set environment on bash as:
+# export MLFLOW_TRACKING_URI=http://127.0.0.1:5000/
 # setup MLflow
-mlflow.set_tracking_uri("http://host.docker.internal:5000")
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000/")
 
-#mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+mlflow.set_tracking_uri(tracking_uri)
+# mlflow.set_tracking_uri("http://host.docker.internal:5000")
+# mlflow.set_tracking_uri("http://127.0.0.1:5000/")
 
 # set up app
 app = Flask('CRS-prediction')
