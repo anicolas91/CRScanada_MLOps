@@ -17,7 +17,15 @@
 # ```bash
 # docker-compose up db adminer grafana --build
 # ```
-# 
+#
+# run the python script as:
+# ```bash
+# python monitoring.py
+# ```
+#
+# Go log into PostgreSQL and grafana, you should see things getting created in a cool existing dashboard 
+#
+#
 # For **PostgreSQL** go to http://localhost:8080/ and on the login fill the following:
 # - system: postgresQL
 # - server: db
@@ -39,11 +47,6 @@
 # neither of them need any credentials
 #
 #
-# ### Converting to python script
-# Simply run
-# ```bash
-# jupyter nbconvert --to script evidently_metrics_eval.ipynb
-# ```
 
 import os
 import sys
