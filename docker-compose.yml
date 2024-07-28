@@ -2,7 +2,8 @@ version: '3.7'
 
 volumes: 
   grafana_data: {}
-  localstack_data: {}
+  db_data: {}
+  s3_data: {}
 
 networks:
   front-tier:
@@ -13,9 +14,13 @@ services:
     image: postgres
     restart: always
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
+      POSTGRES_DB: mlflowdb
     ports:
       - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data # Persist PostgreSQL data
     networks:
       - back-tier
 
@@ -52,7 +57,7 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
       - DOCKER_HOST=unix:///var/run/docker.sock #Allows LocalStack to interact with Docker
     volumes:
-      - localstack_data:/var/lib/localstack #Ensures data persists across restarts
+      - s3_data:/var/lib/localstack #Ensures data persists across restarts
     networks:
       - back-tier
       - front-tier
@@ -66,9 +71,9 @@ services:
       - "5000:5000"
       - "9696:9696"
     environment:
-      - MLFLOW_TRACKING_URI=http://host.docker.internal:5000 # only when running locally
-    volumes:
-      - ${MLFLOW_VOLUME_PATH}:${MLFLOW_VOLUME_PATH} # only needed when running locally
+      - MLFLOW_TRACKING_URI=http://host.docker.internal:5000
+    #volumes:
+      #- "${MLFLOW_VOLUME_PATH}:${MLFLOW_VOLUME_PATH}" # only needed when running locally
     restart: always
     entrypoint: ["gunicorn", "--bind=0.0.0.0:9696", "predict:app"]
 

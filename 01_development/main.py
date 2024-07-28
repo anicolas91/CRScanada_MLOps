@@ -57,7 +57,8 @@ from sklearn.metrics import root_mean_squared_error
 # General Setup
 xgb.set_config(verbosity=0) # set xgb verbosity to none
 #mlflow setup
-mlflow.set_tracking_uri("sqlite:///mlflow.db") # when you set it up like this it overrides the cli artifacts bit
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000/")
+mlflow.set_tracking_uri(tracking_uri)#mlflow.set_tracking_uri("sqlite:///mlflow.db") # when you set it up like this it overrides the cli artifacts bit
 mlflow.set_experiment("CRS-score-canada")
 
 # Cleaned up functions
@@ -154,7 +155,7 @@ def main():
 
     # Main function
     # start runs at each model type and xlabel combo
-    for model_type in model_types: #[:1]:
+    for model_type in model_types:
         for x_labels in xlabels_combos:
             # start a print statement
             print(f'modeling {model_type} with x labels {','.join(x_labels)}...')

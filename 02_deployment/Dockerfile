@@ -7,7 +7,7 @@ RUN pip install -U pip
 
 WORKDIR /app
 
-COPY ./requirements.txt /app/requirements.txt 
+COPY ./02_deployment/requirements.txt /app/requirements.txt 
 
 COPY ./utils/preprocessing.py /app/utils/preprocessing.py
 COPY ./utils/registering.py /app/utils/registering.py
