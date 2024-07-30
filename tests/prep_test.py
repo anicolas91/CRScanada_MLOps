@@ -5,10 +5,8 @@ import pandas as pd
 # import utils
 here = os.path.dirname(__file__)
 sys.path.append(os.path.join(here, '..'))
-from utils import modeling as modl
 from utils import preprocessing as prep
 from utils import splitting as splt
-from utils import registering as regs
 
 url = 'https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json'
 df = prep.create_df_from_website(url)
