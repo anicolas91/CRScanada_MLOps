@@ -221,3 +221,21 @@ username: postgres
 password: example
 database: test
 
+
+## Good practices
+
+### Unit tests
+
+We have added a bunch of unit tests that verify that all the basic data preprocessing/formatting functions work properly.
+
+We use pytest for the unit tests.
+
+This repository has saved inside `.vscode` a json file with the preferences, so if you download the tests extension you should be good to go and you should be able to use VS code UI to run all the unit tests.
+
+Alternatively, if you're too cool for VS code or are a CLI fan, you can just run:
+
+```bash
+pytest tests/prep_test.py -v
+```
+
+Remember to activate your conda environment before running.

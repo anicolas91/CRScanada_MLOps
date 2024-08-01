@@ -22,8 +22,6 @@ if __name__ == "__main__":
     CRS_actual = response['CRS_pred']
     # print values
     print(f'predicted CRS: {CRS_expected}, actual CRS: {CRS_actual}')
-    
+
     assert abs(CRS_expected-CRS_actual) < 10
     print('all good.') #wont print if assertion error btw
-
-

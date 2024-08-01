@@ -11,7 +11,7 @@ def create_df_from_website(url):
     This function scrapes data from the website and converts it to a usable pandas framework.
     '''
     # read in json filetype
-    r = requests.get(url)
+    r = requests.get(url,timeout=10)
     rounds = r.json()['rounds']
     # remove commas from integer strings
     for r in rounds:
@@ -20,7 +20,7 @@ def create_df_from_website(url):
     # create pandas df from dictionary
     df = pd.DataFrame.from_dict(rounds,dtype='string')
     # specify column names as needed
-    columns={"drawNumber": "id", 
+    columns={"drawNumber": "id",
              "drawDate": "date", 
              "drawName": "round type", 
              "drawSize":"invitations issued", 
@@ -47,9 +47,9 @@ def create_df_from_website(url):
              "dd17": "crs_range_000_300",
              }
     # specify dtypes as needed
-    dtypes={#"drawNumber": "id", 
+    dtypes={#"drawNumber": "id",
             "drawDate": "datetime64[ns]", 
-            #"drawName": "round type", 
+            #"drawName": "round type",
             "drawSize":"int64", 
             "drawCRS": "int64",
             #"drawText2": "type issued",
@@ -109,10 +109,13 @@ def calculate_date_vars(df):
 
     return df
 
-def calculate_rolling_averages(df,roll_times=['30D','60D','90D','180D']):
+def calculate_rolling_averages(df,roll_times=None):
     ''' 
     This function calculates the rolling averages point wise for the uneven datetimes
     '''
+    # set up fresh lists
+    if roll_times is None:
+        roll_times = ['30D','60D','90D','180D']
     # flip data from oldest to newest
     df = df.iloc[::-1].copy()
     # get mean CRS in the past N months prior to this value
@@ -131,7 +134,13 @@ def calculate_rolling_averages(df,roll_times=['30D','60D','90D','180D']):
 
     return df
 
-def calculate_offset_windows(df,offset_value=[-1,-2,-3]):
+def calculate_offset_windows(df,offset_value=None):
+    '''
+    This function offsets values by -n and adds them to X values.
+    '''
+    # set up fresh lists
+    if offset_value is None:
+        offset_value = [-1,-2,-3]
     # remove nans so that you dont use their datetimes
     df = df.dropna().copy()
     # get date column
@@ -142,7 +151,7 @@ def calculate_offset_windows(df,offset_value=[-1,-2,-3]):
         df['CRS'+str(offset)] = df['CRS cutoff'].shift(offset)
         #calculate quickly dt
         df['dt'+str(offset)] = dates.diff(periods=offset).abs().dt.days#.shift(offset)
-    
+
     return df.dropna()
 
 def calculate_independent_vars(df):
@@ -160,7 +169,8 @@ def calculate_independent_vars(df):
 
 def preprocess_query_date(query_date):
     ''' 
-    This function converts the query date into a df alongside the X vals that are usually calculated during training
+    This function converts the query date into a df alongside the X vals.
+     X vals are usually calculated during training
     '''
     url = 'https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json'
     df = create_df_from_website(url)
@@ -173,7 +183,7 @@ def preprocess_query_date(query_date):
     df_query = df[:0].copy()
     df_query.loc[query_date,'round type'] = 'General'
     df_query.loc[query_date,'invitations issued'] = 0 #dummy data
-    df_query.loc[query_date,'CRS cutoff'] = 0 #dummy data 
+    df_query.loc[query_date,'CRS cutoff'] = 0 #dummy data
 
     # concatenate to older data
     df = pd.concat([df_query, df_sub])

@@ -7,7 +7,7 @@ import pickle
 import xgboost as xgb
 from sklearn.model_selection import GridSearchCV
 
-def get_best_xgboost_model(X_train, y_train, X_test, y_test,verbose=True):
+def get_best_xgboost_model(X_train, y_train,verbose=True):
     ''' 
     this function is an auxiliary as it gets the best parameters for xgboost
     '''
@@ -22,7 +22,7 @@ def get_best_xgboost_model(X_train, y_train, X_test, y_test,verbose=True):
     model = xgb.XGBRegressor(objective='reg:squarederror')
     clf = GridSearchCV(model, parameters, cv = 3)
     clf.fit(X_train, y_train)
-    
+
     if verbose:
         # establish the best parameters as the precursors for the model
         print(f'Best params: {clf.best_params_}')
@@ -41,5 +41,3 @@ def save_model_to_pickle(model,filename='../models/lin_reg.bin'):
     #save file
     with open(filename, 'wb') as f_out:
         pickle.dump(model, f_out)
-
-    return None

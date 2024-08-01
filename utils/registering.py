@@ -39,14 +39,14 @@ def stage_model_production(model_name = "CRS_Model"):
     model_stage = "Production"
     all_transitions = client.get_latest_versions(name=model_name)
     model_version = len(all_transitions)
-    
+
     client.transition_model_version_stage(
         name=model_name,
         version=model_version,
         stage=model_stage,
         archive_existing_versions=True
 )
-    
+
 def load_model_from_mlflow(run_id,model_type):
     ''' 
     given a run id and the type of model, download and read the model
@@ -74,6 +74,7 @@ def get_prod_info_from_registry(reg_model_name= "CRS_Model"):
     mymodel = client.get_registered_model(name= reg_model_name)
 
     # get run Id of the production model in the register
+    run_id = None
     for lv in mymodel.latest_versions:
         stage = lv.current_stage
         if stage == 'Production':

@@ -1,6 +1,11 @@
+"""
+This script runs a bunch of unit tests for df preprocessing and formatting.
+"""
 import os
 import sys
 import pandas as pd
+
+# pylint: disable=missing-function-docstring
 
 # import utils
 here = os.path.dirname(__file__)
@@ -30,7 +35,6 @@ def test_create_df_from_website():
                     pd.Timestamp('2015-02-27 00:00:00'): 735,
                     pd.Timestamp('2015-02-20 00:00:00'): 808}
                     }
-    
     actual_dict = df[-6:-2].copy().to_dict()
 
     assert expected_dict == actual_dict
@@ -47,7 +51,6 @@ def test_cleanup_df_general_rounds():
         {pd.Timestamp('2015-03-27 00:00:00'): 453,
         pd.Timestamp('2015-03-20 00:00:00'): 481}
         }
-    
     actual_dict = prep.cleanup_df_general_rounds(df[-6:-2].copy()).to_dict()
 
     assert expected_dict == actual_dict
@@ -62,7 +65,6 @@ def test_calculate_date_vars():
                     'dayofweek': 0,
                     'quarter': 1
                     }
-    
     actual_dict = prep.calculate_date_vars(df.copy()).loc['2024-03-25'].to_dict()
 
     assert expected_dict == actual_dict
@@ -77,8 +79,8 @@ def test_calculate_rolling_averages():
                     'roll_90D': 537.3333333333334,
                     'roll_180D': 540.875
                     }
-    
-    actual_dict = prep.calculate_rolling_averages(df[df['round type']=='General'].copy()).loc['2024-03-25'].to_dict()
+    actual_dict = prep.calculate_rolling_averages(
+        df[df['round type']=='General'].copy()).loc['2024-03-25'].to_dict()
 
     assert expected_dict == actual_dict
 
@@ -94,8 +96,8 @@ def test_calculate_offset_windows():
                     'CRS-3': 535.0,
                     'dt-3': 41.0
                     }
-    
-    actual_dict = prep.calculate_offset_windows(df[df['round type']=='General'].copy()).loc['2024-03-25'].to_dict()
+    actual_dict = prep.calculate_offset_windows(
+        df[df['round type']=='General'].copy()).loc['2024-03-25'].to_dict()
 
     assert expected_dict == actual_dict
 
@@ -119,8 +121,8 @@ def test_calculate_independent_vars():
         'dayofweek': 2,
         'quarter': 1
         }
-    
-    actual_dict = prep.calculate_independent_vars(df[df['round type']=='General'].copy()).loc['2024-02-28'].to_dict()
+    actual_dict = prep.calculate_independent_vars(
+        df[df['round type']=='General'].copy()).loc['2024-02-28'].to_dict()
 
     assert expected_dict == actual_dict
 
@@ -143,13 +145,12 @@ def test_preprocess_query_date():
                     'year': 2024,
                     'dayofweek': 0,
                     'quarter': 3}
-    
     actual_dict = prep.preprocess_query_date('2024-07-15').loc['2024-07-15'].to_dict()
 
     assert expected_dict == actual_dict
 
 def test_split_test_train():
-    expected_dtrain = {'round type': 
+    expected_dtrain = {'round type':
                        {pd.Timestamp('2015-02-27 00:00:00'): 'No Program Specified',
                         pd.Timestamp('2015-02-20 00:00:00'): 'Canadian Experience Class'},
                         'invitations issued': 
@@ -158,8 +159,8 @@ def test_split_test_train():
                         'CRS cutoff': 
                         {pd.Timestamp('2015-02-27 00:00:00'): 735,
                         pd.Timestamp('2015-02-20 00:00:00'): 808}}
-    
-    expected_dtest = {'round type': 
+
+    expected_dtest = {'round type':
                     {pd.Timestamp('2015-03-27 00:00:00'): 'No Program Specified',
                     pd.Timestamp('2015-03-20 00:00:00'): 'No Program Specified'},
                     'invitations issued': 
@@ -168,21 +169,21 @@ def test_split_test_train():
                     'CRS cutoff': 
                     {pd.Timestamp('2015-03-27 00:00:00'): 453,
                     pd.Timestamp('2015-03-20 00:00:00'): 481}}
-    
+
     actual_dtrain, actual_dtest = splt.split_test_train(
         df[-6:-2].copy(),
         split_date='01-Mar-2015'
         )
-    
+
     actual_dtrain = actual_dtrain.to_dict()
     actual_dtest = actual_dtest.to_dict()
-    
+
     assert expected_dtrain == actual_dtrain
     assert expected_dtest == actual_dtest
 
 def test_create_features():
     expected_vals = [779, 886]
-    
+
     X, Y = splt.create_features(df[-1:],x_labels='invitations issued',y_labels='CRS cutoff')
 
     actual_vals = [
