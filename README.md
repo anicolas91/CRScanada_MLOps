@@ -1,3 +1,98 @@
+## Setup
+
+0. Install anaconda and docker. We are running anaconda 2.5.2 and docker 4.33.0.
+   
+1. Make sure there is no python env runnig and run:
+```bash
+make setup
+source setup_env.sh
+```
+
+This will create the `crs_env` conda environment, set up the AWS dummy credentials by copy/pasting the `.aws` files on this repo to your root, and activating on the current terminal the conda env as well as some environment variables needed by mlflow.
+
+Note that the bash file also builds the localstack & db docker containers necessary for the simulation of s3 & db, and creates an s3 bucket called `crs-data`.
+
+NOTE: you can verify the docker and aws setup via
+```bash
+docker compose ps
+aws --endpoint-url=http://localhost:4566 s3 ls
+```
+
+2. start mlflow and prefect via:
+```bash
+make start
+```
+
+This will start on the background both prefect and mlflow. It will also use the `01_development/main.py` script to initialize a deployment.
+
+3. Start model training by running:
+
+```bash
+make prefect_deploy_main
+```
+
+You should see data and tracking info being displayed on MLflow (http://127.0.0.1:5000/) and prefect (http://127.0.0.1:4200/)
+
+The system is running both linear fittings and xgboost models, so the pipeline should take **~5 minutes** to run.
+
+In the end you should see 20 models on the system. One linear regression model was selected as the best one and therefore has been registered in MLflow.
+
+4. Deploy the app in a docker container by running:
+```bash
+docker-compose up crs_score_prediction -d --build
+```
+
+followed by a test of the app:
+
+```bash
+python 02_deployment/test.py
+```
+
+You should get the following answer on the CLI:
+```bash
+{'CRS_pred': 535.0, 'query_date': '31-Jul-2024'}
+```
+5. Monitor the performance of the app/best model by running:
+
+```bash
+make monitoring
+```
+
+Go to grafana (http://localhost:3000/login) and log in with the following credentials:
+
+username: admin
+password: admin
+
+You should see a prepared dashboard called `CRS cutoff metrics dashboard` that is monitoring the following metrics:
+- CRS score predicted vs actual
+- rmse
+- standard deviation of the error
+- drift
+
+
+### Extras:
+
+Run all unit tests via:
+```bash
+make run_unit_tests
+```
+
+Run all integration tests via:
+```bash
+make run_integration_test
+```
+
+check the linting performance via:
+```bash
+make linting
+```
+
+### cleanup
+```bash
+docker compose down -v
+make stop
+```
+
 ## Summary
 
 We are doing 3 steps:
@@ -37,17 +132,17 @@ You have two options:
 
     Initialize the s3 and postgresql docker containers via
     ```bash
-    docker-compose up db s3 -d --build
+    docker compose up db s3 -d --build
     ```
 
     Check the status of the containers via:
     ```bash
-    docker-compose ps
+    docker compose ps
     ```
 
     or 
     ```bash
-    docker-compose logs
+    docker compose logs
     ```
 
 
@@ -239,3 +334,20 @@ pytest tests/prep_test.py -v
 ```
 
 Remember to activate your conda environment before running.
+
+### Integration tests
+
+We basically keep running all the dockerfiles available so that the data does not dissappear (the free version of localstack does not allow persistence). We keep only a simple integration test of the app. To run simply:
+
+1. move to the main project folder and activate your virtual environsment 'CRSenv'.
+2. make the bash file executable:
+   ```bash
+   chmod +x integration/run.sh
+   ```
+3. run the bash file as:
+   ```bash
+    ./integration/run.sh
+    ```
+
+### Linting
+We use pylint to lint all python files in our project. We manage a 100% compliance.
