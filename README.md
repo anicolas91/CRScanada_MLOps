@@ -1,7 +1,17 @@
+# CRS Canada immigration metrics analysis
 ## Objective
+We investigate the Comprehensive Ranking System (CRS) score that canada uses to grant permanent residence invitations and predict future cutoff values needed to get awarded an immigration invite.
 
+### Background information
+The government of Canada launched Express Entry in January of 2015 for certain economic immigration programs, where candidates with higher CRS scores have a higher likelihood of being invited. Potential candidates get awarded points depending on ther background, education, work experience, ties to canada, and language requirements.
 
-## Summary
+When Express Entry launched, Canada stated that those who meet the criteria of one of the federal immigration programs managed by the Express Entry system (i.e. Federal Skilled Worker, Canadian Experience Class and Federal Skilled Trades Program) are accepted into a pool of candidates, some of which get an invitation to immigrate if they fulfill a minimum CRS score. Some rounds are specific for each category, and some 'general' rounds allow all applicants to apply as long as they are eligible for one of these four categories.
+
+The minimum cutoff CRS score where a candidate is eligible for an immigration offer shows effects from both seasonal fluctuations, the effects of COVID, the number of applicants and policy changes.
+
+For a thorough analysis of the data and the logic behind the selected ML models, please see the `01_development/CRScanada_modelDevelopment.ipynb` jupyter notebook.
+
+## MLOps Summary
 
 We are doing 3 steps:
 1. 01_development
