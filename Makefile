@@ -60,18 +60,20 @@ stop_mlflow:
 start_prefect:
 	@echo "Starting Prefect server..."
 	@if [ -f $(P_LOG_FILE) ]; then rm $(P_LOG_FILE); fi
-	@nohup $(PREFECT_CMD) > $(P_LOG_FILE) 2>&1 & echo $$! > $(P_PID_FILE)
+	@nohup $(PREFECT_CMD) > $(P_LOG_FILE) 2>&1 &
 	@echo "Prefect server started. Check $(P_LOG_FILE) for logs."
 
 # Stop the Prefect server
 stop_prefect:
 	@echo "Stopping Prefect server..."
-	@if [ -f $(P_PID_FILE) ]; then \
-		PID=$$(cat $(P_PID_FILE)); \
-		kill $$PID && rm $(P_PID_FILE); \
-		echo "Prefect server stopped running.";\
-		else \
-		echo "Prefect server not running."; \
+	@# Find the PID of the running Prefect server process
+	@PID=$$(pgrep -f 'prefect server start'); \
+	if [ -n "$$PID" ]; then \
+		echo "Found Prefect server with PID $$PID."; \
+		kill $$PID; \
+		echo "Prefect server stopped."; \
+	else \
+		echo "No running Prefect server process found."; \
 	fi
 
 
@@ -112,7 +114,6 @@ run_unit_tests:
 	bash -c "${CA} && pytest -v"
 
 run_integration_test:
-	docker compose up crs_score_prediction -d --build
 	bash -c "./integration/run.sh"
 
 linting:
