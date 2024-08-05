@@ -1,36 +1,50 @@
 # CRS Canada immigration metrics analysis
-## Objective
-We investigate the Comprehensive Ranking System (CRS) score that canada uses to grant permanent residence invitations and predict future cutoff values needed to get awarded an immigration invite.
+## Overview
+This project consists of an application that predicts future cutoff scores for the Comprehensive Ranking System (CRS) that Canada uses to grant permanent residence invitations.
+
+### Problem statement
+The invitations rounds happen in infrequent intervals and are subject to several factors both seasonal and policy-based, making it complicated for any future applicants to estimate the CRS score to aim for by the time they submit an application to Express Entry.
+
+### Proposed solution
+
+This application helps applicants prepare better their Express Entry application by having a more robust prediction on the cutoff score they will need to clear to get an invite for permanent residence. 
 
 ### Background information
 The government of Canada launched Express Entry in January of 2015 for certain economic immigration programs, where candidates with higher CRS scores have a higher likelihood of being invited. Potential candidates get awarded points depending on ther background, education, work experience, ties to canada, and language requirements.
 
-When Express Entry launched, Canada stated that those who meet the criteria of one of the federal immigration programs managed by the Express Entry system (i.e. Federal Skilled Worker, Canadian Experience Class and Federal Skilled Trades Program) are accepted into a pool of candidates, some of which get an invitation to immigrate if they fulfill a minimum CRS score. Some rounds are specific for each category, and some 'general' rounds allow all applicants to apply as long as they are eligible for one of these four categories.
+When Express Entry launched, Canada stated that those who meet the criteria of one of the federal immigration programs managed by the Express Entry system (i.e. Federal Skilled Worker, Canadian Experience Class and Federal Skilled Trades Program) are accepted into a pool of candidates, some of which get an invitation to immigrate if they fulfill a minimum CRS score. Some rounds are specific for each category, and some 'General' rounds allow all applicants to apply as long as they are eligible for one of these four categories.
 
-The minimum cutoff CRS score where a candidate is eligible for an immigration offer shows effects from both seasonal fluctuations, the effects of COVID, the number of applicants and policy changes.
+The minimum cutoff CRS score where a candidate is eligible for an immigration offer shows effects from both seasonal fluctuations, the effects of COVID, the number of applicants and policy changes, etc.
 
 For a thorough analysis of the data and the logic behind the selected ML models, please see the `01_development/CRScanada_modelDevelopment.ipynb` jupyter notebook.
 
 ## MLOps Summary
 
-We are doing 3 steps:
+We are doing the following:
 1. 01_development
-   - We are reading in data from the canadian website, massaging it, and getting automatically the best model. 
-   - We work with mlflow to track experiments and register the model. we use prefect to deploy and localstack to simulate an s3 bucket.
+   - We scrape raw data from the canadian website, massage it, and fit several models until we find the best one. 
+   - We work with **Mlflow** an a simulated **postgreSQL** to track all experiments and register the best model. 
+   - We use **Localstack** to simulate an AWS **S3** bucket and avoid usage fees for the time being.
+   - We fully deploy the training workflow via **Prefect**.
 2. 02_deployment
    - We create a web-service app that will predict the estimated CRS cutoff score given a particular date.
-   - We use docker to containerize and deploy the app.
+   - We use **Docker** to containerize and deploy the app.
 3. 03_monitoring
-   - we use evidently to calculate some performance metrics.
-   - We plot a custom dashboard using grafana and postgresql.
-   - We use prefect to keep tabs on everything.
+   - We use **Evidently** to calculate some performance metrics.
+   - We plot a custom dashboard using **Grafana and postgreSQL** that reports both the performance metrics and the predicted vs actual CRS scores.
+   - We use **Prefect** to keep tabs on everything.
+4. Best practices
+   - We perform linting via **pylint**.
+   - We perform unit testing of all preprocessing utils via **pytest**.
+   - We perform integration testing
+   - We streamline everything via **makefiles**.
 
-
-## Setup
+## Walkthrough
+NOTE: The following was run in a macOS monterey. If you are running this in windows or linux, please pay special attention to the comments specific to your platform as you go through this walkthrough.
 
 1. Install [anaconda](https://www.anaconda.com/) and [docker](https://www.docker.com/products/docker-desktop/). We are running anaconda 2.5.2 and docker 4.33.0 at the time of this walkthrough.
    
-2. Make sure there is no python/conda environment running and run:
+2. Make sure there is no python/conda environment running no your terminal and run:
 ```bash
 make setup
 source setup_env.sh
@@ -38,9 +52,9 @@ source setup_env.sh
 
 This will create the `crs_env` conda environment, set up the AWS dummy credentials by copy/pasting the `.aws` files on this repo to your root, and activating on the current terminal the conda env as well as some environment variables needed by mlflow.
 
-Note that the bash file also builds the localstack & db docker containers necessary for the simulation of s3 & db, and creates an s3 bucket called `crs-data`.
+Note that the bash file also builds the `localstack` & `postgreSQL` docker containers necessary for the simulation of `s3` & `db`, and creates an s3 bucket called `crs-data`.
 
-WINDOWS USERS!: 
+**WINDOWS USERS!**: 
 This setup is set for linux/mac. If you are a windows user please follow the instructions [here](#windows-user).
 
 You can verify the docker and aws setup via
@@ -49,32 +63,49 @@ docker compose ps
 aws --endpoint-url=http://localhost:4566 s3 ls
 ```
 
-NOTE: if you don't want to use dummy aws credentials and want alternatives, please follow the instructions [here](#aws-credential-setup)
+NOTE: if you don't want to use dummy aws credentials/don't want to overwrite your credentials and want alternatives, please follow the instructions [here](#aws-credential-setup)
 
 1. start mlflow and prefect via:
 ```bash
 make start
 ```
 
-This will start on the background both prefect and mlflow. It will also use the `01_development/main.py` script to initialize a deployment.
+This will start on the background both prefect and mlflow. It will also use the `01_development/main.py` script to initialize a deployment called `CRS-canada-score-train-deploy`.
 
-4. Start model training by running:
+![prefect-deploy](./imagedocs/deployments.png)
+
+4. Start model training by kicking off the first deployment flow run via:
 ```bash
 make prefect_deploy_main
 ```
 
-You should see data and tracking info being displayed on MLflow (http://127.0.0.1:5000/) and prefect (http://127.0.0.1:4200/)
+You should see data and tracking info being displayed on MLflow (http://127.0.0.1:5000/) 
+
+![mlflow-models](./imagedocs/mlflow_runs.png)
+
+and prefect (http://127.0.0.1:4200/)
+
+![prefect-run](./imagedocs/prefect_run.png)
+
+In the end you should see 20 models on the system.
 
 The system is running both linear fittings and xgboost models, so the pipeline should take **~5 minutes** to run.
 
-In the end you should see 20 models on the system. One linear regression model was selected as the best one and therefore has been registered in MLflow.
+One linear regression model was selected as the best one and therefore has been registered in MLflow.
+
+![mlflow-register](./imagedocs/mlflow_register.png)
+
+The best model performs as follows (you can also find this image inside the artifacts of the registered model):
+
+![best-model](./imagedocs/best_model_fit.png)
 
 
-5. Deploy the app in a docker container by running:
+
+1. Deploy the app in a docker container by running:
 ```bash
 docker compose up crs_score_prediction -d --build
 ```
-LINUX USERS!: This setup is using an mlflow tracking uri that works for mac and windows. If you are running this on a linux machine please follow these instructions [here](#linux-user).
+**LINUX USERS!**: This setup is using an mlflow tracking uri that works for mac and windows. If you are running this on a linux machine please follow these instructions [here](#linux-user).
 
 
 You can test the app via:
@@ -104,6 +135,8 @@ You should see a prepared dashboard called `CRS cutoff metrics dashboard` that i
 - standard deviation of the error
 - drift
 
+![grafana](./imagedocs/grafana.png)
+
 In general we care the most about RMSE. Usually anything below ~20 is fine (its relatively easy to get 20 points on the canadian scoring system).
 
 The high drift is understandable since the CRS system had an overhaul starting 2023, and we are comparing data of 2024 against data from 2015-2023. As more general rounds are held, the drift should go down eventually.
@@ -116,18 +149,20 @@ Run all unit tests via:
 ```bash
 make run_unit_tests
 ```
+![unit-tests](./imagedocs/unit_tests.png)
 
 Run all integration tests via:
 ```bash
 make run_integration_test
 ```
-
 check the linting performance via:
 ```bash
 make linting
 ```
+![integration-linting](./imagedocs/integration_linting.png)
 
-## cleanup
+
+## Cleanup
 
 To stop all docker containers and all servers that were running in the background, run:
 
@@ -167,6 +202,13 @@ You have two options:
       - AWS_ACCESS_KEY_ID=abc
       - AWS_SECRET_ACCESS_KEY=xyz
     ```
+
+    You may need to also update your environment variables so you are using your actual credentials:
+    ```bash
+    export AWS_ACCESS_KEY_ID=abc
+    export AWS_SECRET_ACCESS_KEY=xyz
+    ```
+    
 2. You have no aws credentials set up and want to try dummy ones.
    Copy the .aws folder from the main project folder to your root via `cp -r .aws ~/ ` for linux/mac or `xcopy /E /I /H /R /Y .aws C:\Users\%USERNAME%\.aws` for windows. I am assuming here that your current working directory is the mlops project.
 
