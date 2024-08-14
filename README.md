@@ -126,8 +126,8 @@ make monitoring
 
 Go to grafana (http://localhost:3000/login) and log in with the following credentials:
 
-username: admin
-password: admin
+- username: admin
+- password: admin
 
 You should see a prepared dashboard called `CRS cutoff metrics dashboard` that is monitoring the following metrics:
 - CRS score predicted vs actual
