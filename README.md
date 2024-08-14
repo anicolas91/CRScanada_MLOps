@@ -177,11 +177,11 @@ make stop
 
 If you want to see the raw data, simply go to (http://localhost:8080/) and enter the following:
 
-system: postgresQL
-server: db
-username: postgres
-password: example
-database: test
+- system: postgresQL
+- server: db
+- username: postgres
+- password: example
+- database: test
 
 ### AWS credential setup
 
