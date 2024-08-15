@@ -1,12 +1,11 @@
 # CRS Canada immigration cutoff score analysis
 
 ## Video walkthrough
+Watch the video below:
+
 <a href="https://www.youtube.com/watch?v=-GvjjPpuepY">
   <img src="imagedocs/thumbnail.png" />
 </a>
-
-[![Watch the video](https://img.youtube.com/vi/-GvjjPpuepY/maxresdefault.jpg)](https://www.youtube.com/watch?v=-GvjjPpuepY)
-
 
 ## Overview
 This project consists of an application that predicts future cutoff scores for the Comprehensive Ranking System (CRS) that Canada uses to grant permanent residence invitations.
